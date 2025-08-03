@@ -77,36 +77,20 @@
             <h2 class="text-[#1b0e0e] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Recent Events</h2>
             <div class="flex overflow-y-auto [-ms-scrollbar-style:none] [scrollbar-width:none] [&amp;::-webkit-scrollbar]:hidden">
               <div class="flex items-stretch p-4 gap-3">
+
+                {% for event in latest_events %}
                 <div class="flex h-full flex-1 flex-col gap-4 rounded-lg min-w-60">
                   <div
                     class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg flex flex-col"
-                    style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBDaXJrHn6E2zSpMWiqHsYCR2sMcajeImh308HtqZNyL0F8ew8cRXYnDge04QnYCWTWWkj-qX6gWp3yH9TkAUq_u-b8FZOVhAl1Cv9N-48xeZ_ZoWHBcvhQBlkKlzLRN1NO2Wzz9ZZZjHGB38Zzoq8qpZ865Mt1K8qZbBjPMq7mU6m-xJp-sBe5ArnkxUXEYybiKQ-AzYqI5qtdzoY2sueaW0q0pUmeKS7-KqiHO-Ns9hgNk5m0Ue3YKoWyuI9O9SMTUFiyJKDT23E");'
+                    style='background-image: url("{{ event['photo'] }}");'
                   ></div>
                   <div>
-                    <p class="text-[#1b0e0e] text-base font-medium leading-normal">Annual Science Fair</p>
-                    <p class="text-[#994d51] text-sm font-normal leading-normal">Explore the innovative projects and experiments showcased at this year's science fair.</p>
+                    <p class="text-[#1b0e0e] text-base font-medium leading-normal">{{ event['event_name'] }} - {{ event['year'] }}</p>
+                    <p class="text-[#994d51] text-sm font-normal leading-normal">{{ event["month"] }} {{ event["day"] }} {{ event["year"] }}</p>
                   </div>
                 </div>
-                <div class="flex h-full flex-1 flex-col gap-4 rounded-lg min-w-60">
-                  <div
-                    class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg flex flex-col"
-                    style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD8Ppx0bizmOhjcKuXJET80Rbt9JBVljWSG8OUgJGzPC2dPwK6ogtPLAM4b4QzLY5og5sS1YLBhkSBdlwoGQbKB1ugZ5KvOlYL7718pmTPF19243o359fk3xVdjg4JmwfAJGIb0AcuOpHPKeYZ8M3BJLv9mBgK9iRI7MGXNgYAjyKQEnSNqdh96Khz2nlJH8w7rjOc9jeWKZFETcu90SXetmsHmWuybB2ZwKiMxSbfFdkSz60Td7p4e1mPWu1lqE52hlaJ_V9PAxW8");'
-                  ></div>
-                  <div>
-                    <p class="text-[#1b0e0e] text-base font-medium leading-normal">Spring Concert</p>
-                    <p class="text-[#994d51] text-sm font-normal leading-normal">Relive the beautiful performances and musical talents displayed at the spring concert.</p>
-                  </div>
-                </div>
-                <div class="flex h-full flex-1 flex-col gap-4 rounded-lg min-w-60">
-                  <div
-                    class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg flex flex-col"
-                    style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDMrIDMwks4Ad9LCVlFOwuqrYYE5D3foNIaefxHalsVu4b8UQliIULkLtdqfTnlrs6tweRCkOyWx8H-2DYcx-3_8H85CRjokQFvBAr4zzsPvVkYExKL_X8bPjbsN-bvgvNWb4FgbJRjYAem5hmvKEphLjqnpDfkt1TU6-U76ZmV-CRh-BsQlse1bVkqWxI7C5DH5zq-4oOpiA0Bl5UQEY8DYjekDGDpoOgbUXJ2rtdxPh-BQgZJJIJx8dHVVUi3vz8ULs6fJPWnOnE");'
-                  ></div>
-                  <div>
-                    <p class="text-[#1b0e0e] text-base font-medium leading-normal">Graduation Ceremony</p>
-                    <p class="text-[#994d51] text-sm font-normal leading-normal">Celebrate the achievements of the graduating class with photos and videos from the ceremony.</p>
-                  </div>
-                </div>
+                {% endfor %}
+
               </div>
             </div>
             <h2 class="text-[#1b0e0e] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">What's New</h2>

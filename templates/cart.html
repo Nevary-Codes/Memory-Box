@@ -36,14 +36,15 @@
           </div>
           <div class="flex flex-1 justify-end gap-8">
             <div class="flex items-center gap-9">
-              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="#">Events</a>
-              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="#">Photos</a>
-              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="#">About</a>
+              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('home') }}">Home</a>
+              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('events') }}">Events</a>
+              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('about') }}">About Us</a>
+              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('contact') }}">Contact</a>
             </div>
             <button
               class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#f3e7e8] text-[#1b0e0e] text-sm font-bold leading-normal tracking-[0.015em]"
             >
-              <span class="truncate">Cart (2)</span>
+              <span class="truncate">Cart ({{ cart_items }})</span>
             </button>
             <div
               class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
@@ -54,74 +55,44 @@
         <div class="px-40 flex flex-1 justify-center py-5">
           <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
             <div class="flex flex-wrap justify-between gap-3 p-4"><p class="text-[#1b0e0e] tracking-light text-[32px] font-bold leading-tight min-w-72">Shopping Cart</p></div>
+            
+            {% for items in cart_products %}
             <div class="flex items-center gap-4 bg-[#fcf8f8] px-4 min-h-[72px] py-2 justify-between">
               <div class="flex items-center gap-4">
                 <div
                   class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-14"
-                  style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDESWx2hYaH2hApTX5JEIwlgB9KcxWpJrNNmLefXKuyyduiY1AF78LWJS-WR7C5-NmzFriytIAu1ROHY--gzY_dlvqpBBiGqvo1cAOVOvPJVnZhPD3dJnDhvvh69ILsjy1Qkcc-5Ju6sQjAC52GjdzzRMwjjHrwhmnwDZh_LUE5-jJnOjXHGIMUFfj-PbzlpPG3KfDyZbIXxQyGUsKTzInPwR4SjTrJOOik7uySuVVTNmaWRvRL15qntgq_YZS_sW17kSG2TIDq3po");'
+                  style='background-image: url("{{ items['photo'] }}");'
                 ></div>
                 <div class="flex flex-col justify-center">
-                  <p class="text-[#1b0e0e] text-base font-medium leading-normal line-clamp-1">Photo 1</p>
-                  <p class="text-[#994d51] text-sm font-normal leading-normal line-clamp-2">Event: School Play</p>
+                  <p class="text-[#994d51] text-base font-medium leading-normal line-clamp-1">Event: {{ items['event'] }}</p>
+                  <p class="text-[#1b0e0e] text-ns font-medium leading-normal line-clamp-1">Price: {{ items['price'] }}₹</p>
                 </div>
               </div>
               <div class="shrink-0">
                 <div class="flex items-center gap-2 text-[#1b0e0e]">
-                  <button class="text-base font-medium leading-normal flex h-7 w-7 items-center justify-center rounded-full bg-[#f3e7e8] cursor-pointer">-</button>
+                  <button class="text-base font-medium leading-normal flex h-7 w-7 items-center justify-center rounded-full bg-[#f3e7e8] cursor-pointer" onclick="window.location.href='{{ url_for('remove_from_cart', pid=items['_id']) }}'" >-</button>
                   <input
                     class="text-base font-medium leading-normal w-4 p-0 text-center bg-transparent focus:outline-0 focus:ring-0 focus:border-none border-none [appearance:textfield] [&amp;::-webkit-inner-spin-button]:appearance-none [&amp;::-webkit-outer-spin-button]:appearance-none"
                     type="number"
                     value="1"
                   />
-                  <button class="text-base font-medium leading-normal flex h-7 w-7 items-center justify-center rounded-full bg-[#f3e7e8] cursor-pointer">+</button>
+                  
                 </div>
               </div>
             </div>
-            <div class="flex items-center gap-4 bg-[#fcf8f8] px-4 min-h-[72px] py-2 justify-between">
-              <div class="flex items-center gap-4">
-                <div
-                  class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-14"
-                  style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAyYuM0iB_ZyXtS4NaL7Av84w-GwudnpoUnQ-IDcMNXZC8yR33R0HRVj9QmaVIuqJjtnjh5AfddGpr1fMC00CFFjfumaNS8oTd-V-2KWP0Eyoh8dbX8-LhvdwYuAxCu3yY8OSajRsiMmxYx-JlFT5Ow-tdfpd-zkc1Xn3YYNr7fGWdhexcGvCiphfh_yYp_sBSIQPh3nEpldakhylzxzgjU3k0UCPdq01iWErSO7aiYzECq1A0p8jqt8LxZmOjp4CYT_N3Qr6dcUCI");'
-                ></div>
-                <div class="flex flex-col justify-center">
-                  <p class="text-[#1b0e0e] text-base font-medium leading-normal line-clamp-1">Photo 2</p>
-                  <p class="text-[#994d51] text-sm font-normal leading-normal line-clamp-2">Event: Graduation Ceremony</p>
-                </div>
-              </div>
-              <div class="shrink-0">
-                <div class="flex items-center gap-2 text-[#1b0e0e]">
-                  <button class="text-base font-medium leading-normal flex h-7 w-7 items-center justify-center rounded-full bg-[#f3e7e8] cursor-pointer">-</button>
-                  <input
-                    class="text-base font-medium leading-normal w-4 p-0 text-center bg-transparent focus:outline-0 focus:ring-0 focus:border-none border-none [appearance:textfield] [&amp;::-webkit-inner-spin-button]:appearance-none [&amp;::-webkit-outer-spin-button]:appearance-none"
-                    type="number"
-                    value="1"
-                  />
-                  <button class="text-base font-medium leading-normal flex h-7 w-7 items-center justify-center rounded-full bg-[#f3e7e8] cursor-pointer">+</button>
-                </div>
-              </div>
-            </div>
+            {% endfor %}
+            
             <h3 class="text-[#1b0e0e] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">Order Summary</h3>
             <div class="p-4">
               <div class="flex justify-between gap-x-6 py-2">
-                <p class="text-[#994d51] text-sm font-normal leading-normal">Subtotal</p>
-                <p class="text-[#1b0e0e] text-sm font-normal leading-normal text-right">$10.00</p>
-              </div>
-              <div class="flex justify-between gap-x-6 py-2">
-                <p class="text-[#994d51] text-sm font-normal leading-normal">Shipping</p>
-                <p class="text-[#1b0e0e] text-sm font-normal leading-normal text-right">Free</p>
-              </div>
-              <div class="flex justify-between gap-x-6 py-2">
-                <p class="text-[#994d51] text-sm font-normal leading-normal">Taxes</p>
-                <p class="text-[#1b0e0e] text-sm font-normal leading-normal text-right">$0.50</p>
-              </div>
-              <div class="flex justify-between gap-x-6 py-2">
                 <p class="text-[#994d51] text-sm font-normal leading-normal">Total</p>
-                <p class="text-[#1b0e0e] text-sm font-normal leading-normal text-right">$10.50</p>
+                <p class="text-[#1b0e0e] text-sm font-normal leading-normal text-right">{{ total_price }}₹</p>
               </div>
             </div>
             <div class="flex px-4 py-3 justify-end">
               <button
                 class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#e92932] text-[#fcf8f8] text-sm font-bold leading-normal tracking-[0.015em]"
+                onclick="window.location.href='{{ url_for('billing') }}'"
               >
                 <span class="truncate">Proceed to Checkout</span>
               </button>

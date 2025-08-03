@@ -38,8 +38,8 @@
             <div class="flex items-center gap-9">
               <a class="text-[#0d141c] text-sm font-medium leading-normal" href="{{ url_for('admin') }}">Dashboard</a>
               <a class="text-[#0d141c] text-sm font-medium leading-normal" href="{{ url_for('admin_events') }}">Events</a>
-              
               <a class="text-[#0d141c] text-sm font-medium leading-normal" href="{{ url_for('orders') }}">Orders</a>
+              <a class="text-[#0d141c] text-sm font-medium leading-normal" href="{{ url_for('logout') }}">Logout</a>
             </div>
             <button
               class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#e7edf4] text-[#0d141c] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5"
@@ -86,13 +86,13 @@
                     {% for event in events %}
                     <tr class="border-t border-t-[#cedbe8]">
                       <td class="table-8b016e29-c480-4d52-97c2-f4273a816d13-column-120 h-[72px] px-4 py-2 w-[400px] text-[#0d141c] text-sm font-normal leading-normal">
-                        <a href="{{ url_for('photos', event=event['event_name']) }}">{{ event["event_name"] }} {{ event["year"] }}</a>
+                        <a href="{{ url_for('photos', event=event['_id']) }}">{{ event["event_name"] }} {{ event["year"] }}</a>
                       </td>
                       <td class="table-8b016e29-c480-4d52-97c2-f4273a816d13-column-240 h-[72px] px-4 py-2 w-[400px] text-[#49739c] text-sm font-normal leading-normal">
                         {{ event["month"] }} {{ event["day"] }}, {{ event["year"] }}
                       </td>
                       <td class="table-8b016e29-c480-4d52-97c2-f4273a816d13-column-360 h-[72px] px-4 py-2 w-60 text-[#49739c] text-sm font-bold leading-normal tracking-[0.015em]">
-                        <a>Edit</a> | <a href="{{ url_for('remove_event', event_id = event['_id']) }}">Remove</a>
+                      <a href="{{ url_for('remove_event', event_id = event['_id']) }}">Remove</a>
                       </td>
                     </tr>
                     {% endfor %}

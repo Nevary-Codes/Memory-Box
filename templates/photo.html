@@ -5,7 +5,7 @@
       rel="stylesheet"
       as="style"
       onload="this.rel='stylesheet'"
-      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Plus+Jakarta+Sans%3Awght%40400%3B500%3B700%3B800"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
     />
 
     <title>Stitch Design</title>
@@ -14,10 +14,10 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   </head>
   <body>
-    <div class="relative flex size-full min-h-screen flex-col bg-[#fcf8f8] group/design-root overflow-x-hidden" style='font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;'>
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
       <div class="layout-container flex h-full grow flex-col">
-        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f3e7e8] px-10 py-3">
-          <div class="flex items-center gap-4 text-[#1b0e0e]">
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f4f0f0] px-10 py-3">
+          <div class="flex items-center gap-4 text-[#181111]">
             <div class="size-4">
               <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -32,7 +32,7 @@
                 ></path>
               </svg>
             </div>
-            <h2 class="text-[#1b0e0e] text-lg font-bold leading-tight tracking-[-0.015em]">Memory Box</h2>
+            <h2 class="text-[#181111] text-lg font-bold leading-tight tracking-[-0.015em]">Memory Box</h2>
           </div>
           <div class="flex flex-1 justify-end gap-8">
             <div class="flex items-center gap-9">
@@ -43,34 +43,34 @@
               <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('cart') }}">Cart</a>
             </div>
 
-
+            <div
+              class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+              style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCQalD4sUkvf-GuvYvcu8W1iT35lOsH8fkKPXYP-2-orpy9UoySaIYjoq1aS9DMVkj0tDWME7bhME4ppYGuZW0B2eQANG9SjoOOeAIhfRSNc0I1MtK6RafS-22IQPAbsQids7ntWl2tPQhwEkgxvRkYaoKB1uZuxUIdk8FY2j46Ak1YPxDyoRLK77-UHtUQmOyR9jYcXrHQuY4lDFZbfV7RQmo4iYd9xKct3FJKaQrBEvJ_hUGgdFBqjqvTc355tqFEIv2xXMEajf4");'
+            ></div>
           </div>
         </header>
         <div class="px-40 flex flex-1 justify-center py-5">
           <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
-            <div class="flex flex-wrap justify-between gap-3 p-4">
-              <div class="flex min-w-72 flex-col gap-3">
-                <p class="text-[#1b0e0e] tracking-light text-[32px] font-bold leading-tight">School Events</p>
-                <p class="text-[#994d51] text-sm font-normal leading-normal">Browse through our collection of school events. Click on an event to view photos and videos.</p>
+
+            <div class="flex w-full grow bg-white @container p-4">
+              <div class="w-full gap-1 overflow-hidden bg-white @[480px]:gap-2 aspect-[3/2] rounded-xl flex">
+                <div
+                  class="w-full bg-center bg-no-repeat bg-cover aspect-auto rounded-none flex-1"
+                  style='background-image: url("{{ photos[0]['photo'] }}");'
+                ></div>
               </div>
             </div>
-            <div class="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-3 p-4">
-
-              {% for event in events %}
-              <a href="{{ url_for('event', event_id=event['_id']) }}">
-              <div class="flex flex-col gap-3 pb-3">
-                <div
-                  class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg"
-                  style='background-image: url("{{ event['photo'] }}");'
-                ></div>
-                <div>
-                  <p class="text-[#1b0e0e] text-base font-medium leading-normal">{{ event["event_name"] }} {{event["year"]}}</p>
-                  <p class="text-[#994d51] text-sm font-normal leading-normal">{{ event["day"] }} {{ event["month"] }}, {{ event["year"] }}</p>
-                </div>
-              </div>
-              </a>
-              {% endfor %}
-              </div>
+            <h1 class="text-[#181111] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 text-left pb-3 pt-5">{{ event_name }} {{ year }}</h1>
+            <p class="text-[#181111] text-base font-normal leading-normal pb-3 pt-1 px-4">
+              Price: {{ photos[0]['price'] }}₹
+            </p>
+            <div class="flex px-4 py-3 justify-start">
+              <button
+                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#e9242a] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+                onclick="window.location.href='{{ url_for('add_to_cart', pid=photos[0]['pid']) }}'"
+              >
+                <span class="truncate">Add to Cart</span>
+              </button>
             </div>
           </div>
         </div>

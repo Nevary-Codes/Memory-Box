@@ -36,10 +36,11 @@
           </div>
           <div class="flex flex-1 justify-end gap-8">
             <div class="flex items-center gap-9">
-              <a class="text-[#1b0e0f] text-sm font-medium leading-normal" href="#">Home</a>
-              <a class="text-[#1b0e0f] text-sm font-medium leading-normal" href="#">About</a>
-              <a class="text-[#1b0e0f] text-sm font-medium leading-normal" href="#">Events</a>
-              <a class="text-[#1b0e0f] text-sm font-medium leading-normal" href="#">Contact</a>
+              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('home') }}">Home</a>
+              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('events') }}">Events</a>
+              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('about') }}">About Us</a>
+              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('contact') }}">Contact</a>
+              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('cart') }}">Cart</a>
             </div>
             <button
               class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#f3e7e8] text-[#1b0e0f] text-sm font-bold leading-normal tracking-[0.015em]"
@@ -49,125 +50,80 @@
           </div>
         </header>
         <div class="gap-1 px-6 flex flex-1 justify-center py-5">
-          <div class="layout-content-container flex flex-col max-w-[920px] flex-1">
-            <div class="flex flex-wrap gap-2 p-4">
-              <a class="text-[#974e52] text-base font-medium leading-normal" href="#">Cart</a>
-              <span class="text-[#974e52] text-base font-medium leading-normal">/</span>
-              <span class="text-[#1b0e0f] text-base font-medium leading-normal">Billing Details</span>
-            </div>
+          <!-- ✅ Added Form -->
+          <form action="{{ url_for('add_order') }}" method="POST" class="layout-content-container flex flex-col max-w-[920px] flex-1">
             <h2 class="text-[#1b0e0f] tracking-light text-[28px] font-bold leading-tight px-4 text-left pb-3 pt-5">Billing Details</h2>
-            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-              <label class="flex flex-col min-w-40 flex-1">
-                <p class="text-[#1b0e0f] text-base font-medium leading-normal pb-2">Full Name</p>
+
+            <div class="flex w-full max-w-[700px] flex-wrap items-end gap-6 px-4 py-3">
+              <label class="flex flex-col min-w-[250px] flex-1">
+                <p class="text-[#1b0e0f] text-lg font-semibold pb-2">Full Name</p>
                 <input
                   placeholder="Enter your full name"
-                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#1b0e0f] focus:outline-0 focus:ring-0 border border-[#e7d0d1] bg-[#fcf8f8] focus:border-[#e7d0d1] h-14 placeholder:text-[#974e52] p-[15px] text-base font-normal leading-normal"
-                  value=""
+                  class="form-input w-full rounded-xl text-[#1b0e0f] focus:outline-0 focus:ring-2 focus:ring-[#e7d0d1] border border-[#e7d0d1] bg-[#fcf8f8] h-16 placeholder:text-[#974e52] p-[18px] text-lg font-medium"
+                  name="name"
+                  required
                 />
               </label>
             </div>
-            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-              <label class="flex flex-col min-w-40 flex-1">
-                <p class="text-[#1b0e0f] text-base font-medium leading-normal pb-2">Email Address</p>
+
+            <div class="flex w-full max-w-[700px] flex-wrap items-end gap-6 px-4 py-3">
+              <label class="flex flex-col min-w-[250px] flex-1">
+                <p class="text-[#1b0e0f] text-lg font-semibold pb-2">Email Address</p>
                 <input
                   placeholder="Enter your email address"
-                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#1b0e0f] focus:outline-0 focus:ring-0 border border-[#e7d0d1] bg-[#fcf8f8] focus:border-[#e7d0d1] h-14 placeholder:text-[#974e52] p-[15px] text-base font-normal leading-normal"
-                  value=""
+                  type="email"
+                  class="form-input w-full rounded-xl text-[#1b0e0f] focus:outline-0 focus:ring-2 focus:ring-[#e7d0d1] border border-[#e7d0d1] bg-[#fcf8f8] h-16 placeholder:text-[#974e52] p-[18px] text-lg font-medium"
+                  name="email"
+                  required
                 />
               </label>
             </div>
-            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-              <label class="flex flex-col min-w-40 flex-1">
-                <p class="text-[#1b0e0f] text-base font-medium leading-normal pb-2">Phone Number</p>
+
+            <div class="flex w-full max-w-[700px] flex-wrap items-end gap-6 px-4 py-3">
+              <label class="flex flex-col min-w-[250px] flex-1">
+                <p class="text-[#1b0e0f] text-lg font-semibold pb-2">Phone Number</p>
                 <input
                   placeholder="Enter your phone number"
-                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#1b0e0f] focus:outline-0 focus:ring-0 border border-[#e7d0d1] bg-[#fcf8f8] focus:border-[#e7d0d1] h-14 placeholder:text-[#974e52] p-[15px] text-base font-normal leading-normal"
-                  value=""
+                  type="tel"
+                  class="form-input w-full rounded-xl text-[#1b0e0f] focus:outline-0 focus:ring-2 focus:ring-[#e7d0d1] border border-[#e7d0d1] bg-[#fcf8f8] h-16 placeholder:text-[#974e52] p-[18px] text-lg font-medium"
+                  name="phone"
+                  required
                 />
               </label>
             </div>
-            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-              <label class="flex flex-col min-w-40 flex-1">
-                <p class="text-[#1b0e0f] text-base font-medium leading-normal pb-2">Street Address</p>
-                <input
-                  placeholder="Enter your street address"
-                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#1b0e0f] focus:outline-0 focus:ring-0 border border-[#e7d0d1] bg-[#fcf8f8] focus:border-[#e7d0d1] h-14 placeholder:text-[#974e52] p-[15px] text-base font-normal leading-normal"
-                  value=""
-                />
-              </label>
-            </div>
-            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-              <label class="flex flex-col min-w-40 flex-1">
-                <p class="text-[#1b0e0f] text-base font-medium leading-normal pb-2">City</p>
-                <input
-                  placeholder="Enter your city"
-                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#1b0e0f] focus:outline-0 focus:ring-0 border border-[#e7d0d1] bg-[#fcf8f8] focus:border-[#e7d0d1] h-14 placeholder:text-[#974e52] p-[15px] text-base font-normal leading-normal"
-                  value=""
-                />
-              </label>
-              <label class="flex flex-col min-w-40 flex-1">
-                <p class="text-[#1b0e0f] text-base font-medium leading-normal pb-2">State</p>
-                <input
-                  placeholder="Select your state"
-                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#1b0e0f] focus:outline-0 focus:ring-0 border border-[#e7d0d1] bg-[#fcf8f8] focus:border-[#e7d0d1] h-14 placeholder:text-[#974e52] p-[15px] text-base font-normal leading-normal"
-                  value=""
-                />
-              </label>
-            </div>
-            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-              <label class="flex flex-col min-w-40 flex-1">
-                <p class="text-[#1b0e0f] text-base font-medium leading-normal pb-2">Postal Code</p>
-                <input
-                  placeholder="Enter your postal code"
-                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#1b0e0f] focus:outline-0 focus:ring-0 border border-[#e7d0d1] bg-[#fcf8f8] focus:border-[#e7d0d1] h-14 placeholder:text-[#974e52] p-[15px] text-base font-normal leading-normal"
-                  value=""
-                />
-              </label>
-              <label class="flex flex-col min-w-40 flex-1">
-                <p class="text-[#1b0e0f] text-base font-medium leading-normal pb-2">Country</p>
-                <input
-                  placeholder="Select your country"
-                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#1b0e0f] focus:outline-0 focus:ring-0 border border-[#e7d0d1] bg-[#fcf8f8] focus:border-[#e7d0d1] h-14 placeholder:text-[#974e52] p-[15px] text-base font-normal leading-normal"
-                  value=""
-                />
-              </label>
-            </div>
+
             <div class="flex px-4 py-3 justify-end">
               <button
-                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#e82630] text-[#fcf8f8] text-sm font-bold leading-normal tracking-[0.015em]"
+                class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-[#e82630] text-[#fcf8f8] text-lg font-bold"
+                type="submit"
               >
-                <span class="truncate">Continue to Payment</span>
+                Continue to Payment
               </button>
             </div>
-          </div>
+          </form>
+
+          <!-- Order Summary Section -->
           <div class="layout-content-container flex flex-col w-[360px]">
-            <h2 class="text-[#1b0e0f] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Order Summary</h2>
+            <h2 class="text-[#1b0e0f] text-[22px] font-bold px-4 pb-3 pt-5">Order Summary</h2>
+
+            {% for item in cart_products %}
             <div class="flex items-center gap-4 bg-[#fcf8f8] px-4 min-h-[72px] py-2">
               <div
                 class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-14"
-                style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBQOge1mgbUIzAPXCj9ko7eslC_oDCjUlJKOaooPgfSzCJKMZ8Ed5YHXC5SwQ0ZrV-X0i4xT2VLnvT04T0vld8hsokfy5LqOxm-y6YfatQHWr6PCSol_lHhviaHGWIxmyAAMqTVGowuuYc4z2tW443YJAqNh2uwnYMwNgbAtL09cFm2ByKQaSIeN8ANTdAu1kZVFHzBxejUfL855YEVe2tDW8lzML_5V8QSj4QkjjKw2mcmNIto4PBEFA7ISJo1N6biq_ga-RKYQ0I");'
+                style='background-image: url("{{ item["photo"] }}");'
               ></div>
               <div class="flex flex-col justify-center">
-                <p class="text-[#1b0e0f] text-base font-medium leading-normal line-clamp-1">Yearbook - 2024</p>
-                <p class="text-[#974e52] text-sm font-normal leading-normal line-clamp-2">1 item</p>
+                <p class="text-[#1b0e0f] text-base font-medium leading-normal line-clamp-1">
+                  {{ item["event"] }} - {{ item["year"] }}
+                </p>
               </div>
             </div>
+            {% endfor %}
+
             <div class="p-4 grid grid-cols-[20%_1fr] gap-x-6">
               <div class="col-span-2 grid grid-cols-subgrid border-t border-t-[#e7d0d1] py-5">
-                <p class="text-[#974e52] text-sm font-normal leading-normal">Subtotal</p>
-                <p class="text-[#1b0e0f] text-sm font-normal leading-normal">$49.99</p>
-              </div>
-              <div class="col-span-2 grid grid-cols-subgrid border-t border-t-[#e7d0d1] py-5">
-                <p class="text-[#974e52] text-sm font-normal leading-normal">Shipping</p>
-                <p class="text-[#1b0e0f] text-sm font-normal leading-normal">Free</p>
-              </div>
-              <div class="col-span-2 grid grid-cols-subgrid border-t border-t-[#e7d0d1] py-5">
-                <p class="text-[#974e52] text-sm font-normal leading-normal">Tax</p>
-                <p class="text-[#1b0e0f] text-sm font-normal leading-normal">$0.00</p>
-              </div>
-              <div class="col-span-2 grid grid-cols-subgrid border-t border-t-[#e7d0d1] py-5">
-                <p class="text-[#974e52] text-sm font-normal leading-normal">Total</p>
-                <p class="text-[#1b0e0f] text-sm font-normal leading-normal">$49.99</p>
+                <p class="text-[#974e52] text-sm">Total</p>
+                <p class="text-[#1b0e0f] text-sm">{{ total_price }}₹</p>
               </div>
             </div>
           </div>
