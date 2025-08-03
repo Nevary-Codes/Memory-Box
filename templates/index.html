@@ -43,8 +43,9 @@
             </div>
             <button
               class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#e92932] text-[#fcf8f8] text-sm font-bold leading-normal tracking-[0.015em]"
+              onclick="window.location.href='{{ url_for('login') }}'"
             >
-              <span class="truncate">Get Started</span>
+              <span class="truncate">An Admin? Login Here</span>
             </button>
           </div>
         </header>
@@ -68,6 +69,7 @@
                   </div>
                   <button
                     class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 @[480px]:h-12 @[480px]:px-5 bg-[#e92932] text-[#fcf8f8] text-sm font-bold leading-normal tracking-[0.015em] @[480px]:text-base @[480px]:font-bold @[480px]:leading-normal @[480px]:tracking-[0.015em]"
+                    onclick="window.location.href='{{ url_for('events') }}'"
                   >
                     <span class="truncate">Explore Events</span>
                   </button>
@@ -139,6 +141,7 @@
                   <div class="flex justify-center">
                     <button
                       class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 @[480px]:h-12 @[480px]:px-5 bg-[#e92932] text-[#fcf8f8] text-sm font-bold leading-normal tracking-[0.015em] @[480px]:text-base @[480px]:font-bold @[480px]:leading-normal @[480px]:tracking-[0.015em] grow"
+                      onclick="window.location.href='{{ url_for('events') }}'"
                     >
                       <span class="truncate">Get Started</span>
                     </button>
@@ -151,12 +154,12 @@
         <footer class="flex justify-center">
           <div class="flex max-w-[960px] flex-1 flex-col">
             <footer class="flex flex-col gap-6 px-5 py-10 text-center @container">
-              <div class="flex flex-wrap items-center justify-center gap-6 @[480px]:flex-row @[480px]:justify-around">
+              <!-- <div class="flex flex-wrap items-center justify-center gap-6 @[480px]:flex-row @[480px]:justify-around">
                 <a class="text-[#994d51] text-base font-normal leading-normal min-w-40" href="#">About Us</a>
                 <a class="text-[#994d51] text-base font-normal leading-normal min-w-40" href="#">Contact</a>
                 <a class="text-[#994d51] text-base font-normal leading-normal min-w-40" href="#">Privacy Policy</a>
                 <a class="text-[#994d51] text-base font-normal leading-normal min-w-40" href="#">Terms of Service</a>
-              </div>
+              </div> -->
               <p class="text-[#994d51] text-base font-normal leading-normal">© 2023 Memory Box. All rights reserved.</p>
             </footer>
           </div>

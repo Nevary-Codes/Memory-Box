@@ -430,9 +430,14 @@ def add_order():
         "confirmed": False
     }
 
-    db["Orders"].insert_one(details)
+    result = db["Orders"].insert_one(details)
+    oid = result.inserted_id  # ✅ Get the ObjectId
 
-    return redirect(url_for('home'))
+    session["cart"] = []
+    session.modified = True  # Ensure Flask updates the session
+
+
+    return redirect(url_for("confirmed", oid=str(oid)))
 
 @app.route("/reject_order")
 @login_required
@@ -508,6 +513,12 @@ def accept_order():
 def logout():
     logout_user()
     return redirect(url_for("home"))
+
+@app.route("/confirmed")
+def confirmed():
+    oid = request.args.get("oid")
+
+    return render_template("confirmed.html", oid=oid)
 
 if __name__ == "__main__":
     with app.app_context():

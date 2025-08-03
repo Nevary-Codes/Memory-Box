@@ -5,7 +5,7 @@
       rel="stylesheet"
       as="style"
       onload="this.rel='stylesheet'"
-      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Plus+Jakarta+Sans%3Awght%40400%3B500%3B700%3B800"
     />
 
     <title>Stitch Design</title>
@@ -14,10 +14,10 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   </head>
   <body>
-    <div class="relative flex size-full min-h-screen flex-col bg-gray-50 group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
+    <div class="relative flex size-full min-h-screen flex-col bg-[#fcf8f8] group/design-root overflow-x-hidden" style='font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;'>
       <div class="layout-container flex h-full grow flex-col">
-        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e9edf1] px-10 py-3">
-          <div class="flex items-center gap-4 text-[#101419]">
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f3e7e8] px-10 py-3">
+          <div class="flex items-center gap-4 text-[#1b0e0e]">
             <div class="size-4">
               <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -32,62 +32,46 @@
                 ></path>
               </svg>
             </div>
-            <h2 class="text-[#101419] text-lg font-bold leading-tight tracking-[-0.015em]">Memory Box</h2>
+            <h2 class="text-[#1b0e0e] text-lg font-bold leading-tight tracking-[-0.015em]">Memory Box</h2>
           </div>
           <div class="flex flex-1 justify-end gap-8">
             <div class="flex items-center gap-9">
-              <a class="text-[#0d141c] text-sm font-medium leading-normal" href="{{ url_for('admin') }}">Dashboard</a>
-              <a class="text-[#0d141c] text-sm font-medium leading-normal" href="{{ url_for('admin_events') }}">Events</a>
-              <a class="text-[#0d141c] text-sm font-medium leading-normal" href="{{ url_for('orders') }}">Orders</a>
-              <a class="text-[#0d141c] text-sm font-medium leading-normal" href="{{ url_for('logout') }}">Logout</a>
+              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('home') }}">Home</a>
+              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('events') }}">Events</a>
+              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('about') }}">About Us</a>
+              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('contact') }}">Contact</a>
+              <a class="text-[#1b0e0e] text-sm font-medium leading-normal" href="{{ url_for('cart') }}">Cart</a>
             </div>
           </div>
         </header>
         <div class="px-40 flex flex-1 justify-center py-5">
-          <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
-            <div class="flex flex-wrap gap-2 p-4">
-              <a class="text-[#58728d] text-base font-medium leading-normal" href="#">Events</a>
-              <span class="text-[#58728d] text-base font-medium leading-normal">/</span>
-              <span class="text-[#101419] text-base font-medium leading-normal">Photo Management</span>
-            </div>
-            <div class="flex flex-wrap justify-between gap-3 p-4">
-              <div class="flex min-w-72 flex-col gap-3">
-                <p class="text-[#101419] tracking-light text-[32px] font-bold leading-tight">Photo Management</p>
-                <p class="text-[#58728d] text-sm font-normal leading-normal">Manage photos for the '{{ name }} {{ year }}' event</p>
+          <div class="layout-content-container flex flex-col w-[512px] max-w-[512px] py-5 max-w-[960px] flex-1">
+            <h2 class="text-[#1b0e0e] tracking-light text-[28px] font-bold leading-tight px-4 text-center pb-3 pt-5">Order Complete</h2>
+            <p class="text-[#1b0e0e] text-base font-normal leading-normal pb-3 pt-1 px-4 text-center">
+              Your order has been processed and is now complete. We will send you an email with your photos attached as soon as we recieve the proof of payment.
+            </p>
+            <h3 class="text-[#1b0e0e] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">Order Details</h3>
+            <div class="p-4 grid grid-cols-[20%_1fr] gap-x-6">
+              <div class="col-span-2 grid grid-cols-subgrid border-t border-t-[#e7d0d1] py-5">
+                <p class="text-[#994d51] text-sm font-normal leading-normal">Order Number</p>
+                <p class="text-[#1b0e0e] text-sm font-normal leading-normal">#{{ oid }}</p>
+              </div>
+              <div class="col-span-2 grid grid-cols-subgrid border-t border-t-[#e7d0d1] py-5">
+                <p class="text-[#994d51] text-sm font-normal leading-normal">Items Purchased</p>
+                <p class="text-[#1b0e0e] text-sm font-normal leading-normal">High-Definition Photos</p>
               </div>
             </div>
-            <div class="px-4 py-3">
-              <label class="flex flex-col min-w-40 h-12 w-full">
-                
-              </label>
-            </div>
-
-            <div class="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-3 p-4">
-
-            {% for photo in photos %}
-              <div class="flex flex-col gap-3 pb-3">
-                <div
-                  class="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-xl"
-                  style='background-image: url("{{ photo['photo'] }}");'
-                ></div>
-                <div>
-                  <p class="text-[#101419] text-base font-medium leading-normal">
-                    {{ photo["photo_name"] }} {{ photo["year"] }}
-                  </p>
-                </div>
-              </div>
-            {% endfor %}
-
-
-              
-            <div class="flex px-4 py-3 justify-end">
+            <div class="flex px-4 py-3 justify-center">
               <button
-                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#d2e2f3] text-[#101419] text-sm font-bold leading-normal tracking-[0.015em]"
-                onclick="window.location.href='{{ url_for('admin_photo', event=name) }}'"
+                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#ea2832] text-[#fcf8f8] text-sm font-bold leading-normal tracking-[0.015em]"
+                onclick="window.location.href='{{ url_for('home') }}'"
               >
-                <span class="truncate">Add New Photo</span>
+                <span class="truncate">Back to Home</span>
               </button>
             </div>
+            <p class="text-[#1b0e0e] text-base font-normal leading-normal pb-3 pt-1 px-4 text-center">
+              Thank you for your purchase! If you have any questions or need assistance, please contact our support team at support@memorybox.com.
+            </p>
           </div>
         </div>
       </div>
