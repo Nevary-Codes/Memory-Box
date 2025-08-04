@@ -73,7 +73,7 @@
                   <tbody>
                     {% for order in orders %}
                     <tr class="border-t border-[var(--border-color)]">
-                      <td class="px-4 py-2 w-[400px] text-[var(--primary-text)] text-sm">#{{ order['_id'] }}</td>
+                      <td class="px-4 py-2 w-[400px] text-[var(--primary-text)] text-sm"><a href="{{ url_for('summary', oid=order['_id']) }}">#{{ order['_id'] }}</a></td>
                       <td class="px-4 py-2 w-[400px] text-[var(--secondary-text)] text-sm">{{ order["name"] }}</td>
                       <td class="px-4 py-2 w-[400px] text-[var(--secondary-text)] text-sm">{{ order["total_price"] }}₹</td>
                       <td class="px-4 py-2 w-60 text-[var(--accent)] text-sm font-bold"><a href="{{ url_for('accept_order', oid=order['_id']) }}">Accept</a> | <a href="{{ url_for('reject_order', oid=order['_id']) }}">Reject</a></td>

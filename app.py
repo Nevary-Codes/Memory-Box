@@ -274,7 +274,8 @@ def photos(event):
         "photos.html",
         name=event_name,
         photos=combined_photos,
-        year=year
+        year=year,
+        event=event
     )
 
 
@@ -297,7 +298,6 @@ def admin_event():
 @app.route("/<event>/photos/admin-photo", methods=["GET", "POST"])
 @login_required
 def admin_photo(event):
-
     return render_template("admin-photo.html", event=event)
 
 
@@ -347,19 +347,20 @@ def remove_event(event_id):
 def add_photo(event):
     photo_name = request.form.get("photo_name")
     price = request.form.get("price")
-    photo = request.files.get("photo")
-    upload_result = cloudinary.uploader.upload(photo)
-    image_url = upload_result['secure_url']
-    
+    photos = request.files.getlist("photo")  # ✅ Get multiple files
 
-    event_doc = {
-        "photo_name": photo_name,
-        "event": event,
-        "price": price,
-        "photo": image_url,
-    }
+    for photo in photos:
+        if photo:
+            upload_result = cloudinary.uploader.upload(photo)
+            image_url = upload_result['secure_url']
 
-    db["Photos"].insert_one(event_doc)
+            db["Photos"].insert_one({
+                "photo_name": photo_name,
+                "event": event,
+                "price": price,
+                "photo": image_url,
+            })
+
     return redirect(url_for("photos", event=event))
 
 
@@ -519,6 +520,22 @@ def confirmed():
     oid = request.args.get("oid")
 
     return render_template("confirmed.html", oid=oid)
+
+@app.route("/summary")
+@login_required
+def summary():
+    oid = request.args.get("oid")
+    order = db.Orders.find_one({"_id": ObjectId(oid)})
+    cart_ids = order.get("cart", [])
+    product_objects = []
+    if cart_ids:
+        object_ids = [ObjectId(pid) for pid in cart_ids if is_valid_objectid(pid)]
+        product_cursor = db.Photos.find({"_id": {"$in": object_ids}})
+        product_objects = list(product_cursor)
+
+    print(product_objects)
+    return render_template("summary.html", order=order, products=product_objects)
+
 
 if __name__ == "__main__":
     with app.app_context():
