@@ -2,8 +2,9 @@ from collections import defaultdict
 import cloudinary
 import cloudinary.uploader
 from cloudinary.utils import cloudinary_url
-from flask import Flask, Response, render_template, redirect, url_for, request, jsonify, flash, session
+from flask import Flask, Response, json, render_template, redirect, url_for, request, jsonify, flash, session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash
 from flask_bcrypt import Bcrypt
 import bcrypt as bc
@@ -22,6 +23,20 @@ import zipfile
 from io import BytesIO
 from flask import render_template_string, send_file
 
+def extract_public_id(url):
+    """
+    Extract the public_id from a Cloudinary URL.
+    Assumes URL structure like:
+    https://res.cloudinary.com/<cloud_name>/image/upload/v<version>/<public_id>.<ext>
+    """
+    try:
+        parts = url.split("/")
+        filename = parts[-1]  # <public_id>.<ext>
+        public_id = filename.rsplit(".", 1)[0]  # Remove file extension
+        return "/".join(parts[parts.index("upload") + 1:-1]) + "/" + public_id if "/" in url else public_id
+    except Exception as e:
+        print(f"Failed to extract public_id from URL: {url}, error: {e}")
+        return None
 
 
 load_dotenv()
@@ -33,7 +48,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'aryanmanchan@gmail.com'
-app.config['MAIL_PASSWORD'] = 'wrkg emyi gumg putl'  # Use App Password for Gmail
+app.config['MAIL_PASSWORD'] = 'wrkg emyi gumg putl'  
 
 mail = Mail(app)
 
@@ -44,28 +59,53 @@ bcrypt = Bcrypt(app)
 cloudinary.config( 
     cloud_name = os.environ.get("CLOUDINARY_NAME"),
     api_key = os.environ.get("CLOUDINARY_API_KEY"), 
-    api_secret = os.environ.get("CLOUDINARY_SECRET"), # Click 'View API Keys' above to copy your API secret
+    api_secret = os.environ.get("CLOUDINARY_SECRET"), 
     secure=True
 )
 
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
-uri = os.getenv("MONGO_URI")
-client = MongoClient(uri, server_api=ServerApi("1"))
-db = client["MemoryBox"]
 
+class Admin(UserMixin, db.Model):
+    __tablename__ = 'admins'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password = db.Column(db.LargeBinary(60), nullable=False)
 
-class Admin(UserMixin):
-    def __init__(self, admin_dict):
-        self.id = str(admin_dict["_id"])
-        self.email = admin_dict["email"]
+class Events(db.Model):
+    __tablename__ = "events"
+    id = db.Column(db.Integer, primary_key=True)
+    event_name = db.Column(db.String(255), nullable=False)
+    day = db.Column(db.Integer, nullable=False)
+    month = db.Column(db.String(100), nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+    photo = db.Column(db.String(500), nullable=False)
+    photos = db.relationship("Photos", backref="event", cascade="all, delete", passive_deletes=True)
+
+class Orders(db.Model):
+    __tablename__ = "orders"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(150), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    cart = db.Column(db.JSON)
+    confirmed = db.Column(db.Boolean, default=False, nullable=False)
+
+class Photos(db.Model):
+    __tablename__ = "photos"
+    id = db.Column(db.Integer, primary_key=True)
+    photo_name = db.Column(db.String(255), nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey("events.id", ondelete="CASCADE"), nullable=False)
+    price = db.Column(db.Integer, nullable=False)
+    photo = db.Column(db.String(500), nullable=False)
 
 @login_manager.user_loader
 def load_user(user_id):
-    admins = db["Admins"]
-    admin = admins.find_one({"_id": ObjectId(user_id)})
+    admin = Admin.query.get(user_id)
     if admin:
-        return Admin(admin)
-    return None
+        return admin
 
 def is_valid_objectid(oid):
     try:
@@ -77,10 +117,8 @@ def is_valid_objectid(oid):
 
 @app.route("/")
 def home():
-    # Fetch latest 3 events from the Photos (or Events) collection
-    latest_events = list(
-        db.Events.find().sort("_id", -1)
-    )
+    
+    latest_events = Events.query.order_by(Events.id.desc()).limit(5).all()
 
     return render_template("index.html", latest_events=latest_events)
 
@@ -91,12 +129,12 @@ def login():
         email = request.form.get("username")
         password = request.form.get("password")
 
-        admin = db.Admins.find_one({"email": email})
-        if admin and bc.checkpw(password.encode("utf-8"), admin["password"]):
-            user = Admin(admin)
-            login_user(user)
+        admin = Admin.query.filter_by(email=email).first()
+        if admin and bc.checkpw(password.encode("utf-8"), admin.password):
+            login_user(admin)
             return redirect(url_for("admin"))
         else:
+            flash("Invalid credentials")
             return redirect(url_for("login"))
 
     return render_template("login.html")
@@ -104,27 +142,26 @@ def login():
 
 @app.route("/events")
 def events():
-    events = list(db["Events"].find())
+    events = list(Events.query.all())
     return render_template("events.html", events=events)
 
 
 @app.route("/events/<event_id>")
 def event(event_id):
-    event_doc = db["Events"].find_one({"_id": ObjectId(event_id)})
-    photos_data = list(db["Photos"].find({"event": event_id}))
-    year = event_doc["year"] if event_doc else ""
-    event_name = event_doc["event_name"] if event_doc else ""
+    event_doc = Events.query.get(event_id)
+    photos_data = Photos.query.filter_by(event_id=event_id).all()
+    year = event_doc.year if event_doc else ""
+    event_name = event_doc.event_name if event_doc else ""
 
     combined_photos = []
     for p in photos_data:
         combined_photos.append({
-            "_id": p["_id"],
-            "photo": get_watermarked_url(p["photo"]),  # 🔹 Watermarked URL
-            "event": p["event"],
-            "photo_name": p["photo_name"],
-            "year": event_doc["year"] if event_doc else None
+            "_id": p.id,
+            "photo": get_watermarked_url(p.photo),
+            "event": p.event,
+            "photo_name": p.photo_name,
+            "year": event_doc.year if event_doc else None
         })
-
 
     return render_template(
         "event.html",
@@ -139,35 +176,29 @@ def event(event_id):
 @app.route("/cart")
 def cart():
     cart_ids = session.get("cart", [])
+    object_ids = [pid for pid in cart_ids]
 
-    # ✅ Filter only valid ObjectIds
-    object_ids = [ObjectId(pid) for pid in cart_ids if is_valid_objectid(pid)]
-
-    cart_products = list(db.Photos.find({"_id": {"$in": object_ids}}))
+    cart_products = Photos.query.filter(Photos.id.in_(object_ids)).all()
 
     total_price = 0
 
     for i in cart_products:
-        # ✅ Fetch event document for each photo
-        event_doc = db.Events.find_one({"_id": ObjectId(i["event"])})
-        if event_doc:
-            i["event"] = event_doc.get("event_name", "Unknown Event")
+        # Attach event name
+        event_doc = Events.query.get(i.event_id)
+        i.event_name = event_doc.event_name if event_doc else "Unknown Event"
 
-        # ✅ Add watermark to photo
-        i["photo"] = get_watermarked_url(i["photo"])
+        # Watermark photo URL
+        i.photo = get_watermarked_url(i.photo)
 
-        # ✅ Add to total price (convert price to float/int safely)
         try:
-            total_price += float(i.get("price", 0))
+            total_price += float(i.price)
         except ValueError:
-            pass  # Ignore if price is invalid
-
-    print(cart_products)
+            pass
 
     return render_template(
         "cart.html",
         cart_products=cart_products,
-        total_price=total_price,  # ✅ Pass total price to template
+        total_price=total_price,
         isEmpty=len(cart_products) == 0,
         cart_items=len(cart_products)
     )
@@ -176,29 +207,27 @@ def cart():
 @app.route("/billing", methods=["GET", "POST"])
 def billing():
     cart_ids = session.get("cart", [])
+    object_ids = [pid for pid in cart_ids]
 
-    # ✅ Filter only valid ObjectIds
-    object_ids = [ObjectId(pid) for pid in cart_ids if is_valid_objectid(pid)]
-
-    cart_products = list(db.Photos.find({"_id": {"$in": object_ids}}))
+    cart_products = Photos.query.filter(Photos.id.in_(object_ids)).all()
 
     total_price = 0
 
     for i in cart_products:
-        # ✅ Fetch event document for each photo
-        event_doc = db.Events.find_one({"_id": ObjectId(i["event"])})
+        
+        event_doc = Events.query.get(i.event_id)
         if event_doc:
-            i["event"] = event_doc.get("event_name", "Unknown Event")
-            i["year"] = event_doc.get("year")
+            i.event_name = event_doc.event_name
+            i.year = event_doc.year
 
-        # ✅ Add watermark to photo
-        i["photo"] = get_watermarked_url(i["photo"])
+        
+        i.photo = get_watermarked_url(i.photo)
 
-        # ✅ Add to total price (convert price to float/int safely)
+        
         try:
-            total_price += float(i.get("price", 0))
+            total_price += float(i.price)
         except ValueError:
-            pass  # Ignore if price is invalid
+            pass  
 
     return render_template("billing.html", cart_products=cart_products, total_price=total_price)
 
@@ -206,48 +235,46 @@ def billing():
 @app.route("/admin")
 @login_required
 def admin():
-    events = len(list(db["Events"].find()))
-    photos = len(list(db["Photos"].find()))
-    orders = len(list(db["Orders"].find()))
-    pending = len(list(db["Orders"].find({"confirmed": False})))
+    events = len(list(Events.query.all()))
+    photos = len(list(Photos.query.all()))
+    orders = len(list(Orders.query.all()))
+    pending = len(list(Orders.query.filter_by(confirmed=False)))
     return render_template("admin.html", events=events, photos=photos, orders=orders, pending=pending)
 
 
 @app.route("/admin-events")
 @login_required
 def admin_events():
-    events = list(db["Events"].find())
+    events = list(Events.query.all())
     return render_template("admin-events.html", events=events)
 
 
 @app.route("/orders")
 @login_required
 def orders():
-    orders_cursor = db.Orders.find({"confirmed": False})
+    orders_query = Orders.query.filter_by(confirmed=False).all()
     orders = []
 
-    for order in orders_cursor:
-        cart_ids = order.get("cart", [])
+    for order in orders_query:
+        cart_ids = order.cart if order.cart else []  # assuming cart is a list of photo IDs
         product_objects = []
-        total_price = 0  # Initialize total price for each order
+        total_price = 0
 
         if cart_ids:
-            object_ids = [ObjectId(pid) for pid in cart_ids if is_valid_objectid(pid)]
-            product_cursor = db.Photos.find({"_id": {"$in": object_ids}})
-            product_objects = list(product_cursor)
-
-            # Calculate total price
+            product_objects = Photos.query.filter(Photos.id.in_(cart_ids)).all()
             for product in product_objects:
-                price = product.get("price", 0)
                 try:
-                    price = float(price)
+                    total_price += float(product.price)
                 except (ValueError, TypeError):
-                    price = 0
-                total_price += price
+                    total_price += 0
 
-        order["products"] = product_objects
-        order["total_price"] = total_price  # Add total price to order
-        orders.append(order)
+        orders.append({
+            "id": order.id,
+            "products": product_objects,
+            "total_price": total_price,
+            "name": order.name
+        })
+
 
     return render_template("orders.html", orders=orders)
 
@@ -255,18 +282,19 @@ def orders():
 @app.route("/<event>/photos")
 @login_required
 def photos(event):
-    event_doc = db["Events"].find_one({"_id": ObjectId(event)})
-    photos_data = list(db["Photos"].find({"event": event}))
-    year = event_doc["year"] if event_doc else ""
-    event_name = event_doc["event_name"]
+    event_doc = Events.query.get(event)
+    photos_data = list(Photos.query.filter_by(event_id=event).all())
+    year = event_doc.year if event_doc else ""
+    event_name = event_doc.event_name
+
 
     combined_photos = []
     for p in photos_data:
         combined_photos.append({
-            "photo": p["photo"],  # ObjectId of the image
-            "event": p["event"],  # event name
-            "photo_name": p["photo_name"],
-            "year": event_doc["year"] if event_doc else None
+            "photo": p.photo,  
+            "event": p.event_id,  
+            "photo_name": p.photo_name,
+            "year": event_doc.year if event_doc else None
         })
 
 
@@ -313,15 +341,10 @@ def add_event():
     upload_result = cloudinary.uploader.upload(photo)
     image_url = upload_result['secure_url']
 
-    event = {
-        "event_name": event_name,
-        "day": day,
-        "month": month,
-        "year": year,
-        "photo": image_url
-    }
+    event = Events(event_name=event_name, day=day, month=month, year=year, photo=image_url)
+    db.session.add(event)
+    db.session.commit()
 
-    db["Events"].insert_one(event)
     return redirect(url_for("admin_events"))
 
 
@@ -334,11 +357,32 @@ def get_image(file_id):
     return Response(event["photo"], mimetype=event.get("photo_mime", "image/png"))
 
 
-@app.route("/remove_event/<event_id>", methods=["GET", "POST"])
+
+@app.route("/remove_event/<int:event_id>", methods=["GET", "POST"])
 @login_required
 def remove_event(event_id):
-    removeEvent(event_id)
+    event = Events.query.get(event_id)
+    if not event:
+        flash("Event not found.", "error")
+        return redirect(url_for("admin_events"))
 
+    # Delete associated photos (Cloudinary + DB)
+    photos = Photos.query.filter_by(event_id=event_id).all()
+
+    for photo in photos:
+        public_id = extract_public_id(photo.photo)
+        if public_id:
+            try:
+                cloudinary.uploader.destroy(public_id)
+            except Exception as e:
+                print(f"Error deleting {public_id} from Cloudinary:", e)
+
+        db.session.delete(photo)
+
+    db.session.delete(event)  # now safe to delete the event
+    db.session.commit()
+
+    flash("Event and photos deleted.", "success")
     return redirect(url_for("admin_events"))
 
 
@@ -347,41 +391,41 @@ def remove_event(event_id):
 def add_photo(event):
     photo_name = request.form.get("photo_name")
     price = request.form.get("price")
-    photos = request.files.getlist("photo")  # ✅ Get multiple files
+    photos = request.files.getlist("photo")
 
     for photo in photos:
         if photo:
             upload_result = cloudinary.uploader.upload(photo)
             image_url = upload_result['secure_url']
 
-            db["Photos"].insert_one({
-                "photo_name": photo_name,
-                "event": event,
-                "price": price,
-                "photo": image_url,
-            })
+            photos = Photos(photo_name=photo_name, event_id=event, price=price, photo=image_url)
+            db.session.add(photos)
+            db.session.commit()
+
 
     return redirect(url_for("photos", event=event))
 
 
 @app.route("/events/<event>/photo/<photo>")
 def photo(event, photo):
-    event_doc = db["Events"].find_one({"_id": ObjectId(event)})
-    photos_data = list(db["Photos"].find({"_id": ObjectId(photo)}))
-    year = event_doc["year"] if event_doc else ""
-    event_name = event_doc["event_name"] if event_doc else ""
+    event_doc = Events.query.get(event)
+    photos_data = Photos.query.get(photo)
+    year = event_doc.year if event_doc else ""
+    event_name = event_doc.event_name
 
+    p = photos_data
     combined_photos = []
-    for p in photos_data:
-        combined_photos.append({
-            "pid": p["_id"],
-            "photo": get_watermarked_url(p["photo"]),  # 🔹 Watermarked URL
-            "event": p["event"],
-            "photo_name": p["photo_name"],
-            "year": event_doc["year"] if event_doc else None,
-            "price": p["price"]
+    
+    combined_photos.append({
+            "pid": p.id,
+            "photo": get_watermarked_url(p.photo),  
+            "event": p.event,
+            "photo_name": p.photo_name,
+            "year": event_doc.year if event_doc else None,
+            "price": p.price
         })
-
+        
+    
 
     return render_template("photo.html", year=year, photos=combined_photos, event_name=event_name)
 
@@ -389,7 +433,6 @@ def photo(event, photo):
 @app.route("/add_to_cart")
 def add_to_cart():
     pid = request.args.get("pid")
-    print(pid)
     if not pid:
         return redirect(url_for("home"))
 
@@ -423,19 +466,24 @@ def add_order():
     phone = request.form.get("phone")
     cart = session.get("cart")
 
-    details = {
-        "name": name,
-        "email": email,
-        "phone": phone,
-        "cart": cart,
-        "confirmed": False
-    }
+    order = Orders(name=name, email=email, phone=phone, cart=cart, confirmed=False)
 
-    result = db["Orders"].insert_one(details)
-    oid = result.inserted_id  # ✅ Get the ObjectId
+    # details = {
+    #     "name": name,
+    #     "email": email,
+    #     "phone": phone,
+    #     "cart": cart,
+    #     "confirmed": False
+    # }
+
+
+    db.session.add(order)
+    db.session.commit()
+
+    oid = order.id
 
     session["cart"] = []
-    session.modified = True  # Ensure Flask updates the session
+    session.modified = True  
 
 
     return redirect(url_for("confirmed", oid=str(oid)))
@@ -444,7 +492,10 @@ def add_order():
 @login_required
 def reject_order():
     oid = request.args.get("oid")
-    db.Orders.delete_one({"_id": ObjectId(oid)})
+    order = Orders.query.get(oid)
+    if order:
+        db.session.delete(order)
+        db.session.commit()
 
     return redirect(url_for('orders'))
 
@@ -453,60 +504,81 @@ def reject_order():
 @login_required
 def accept_order():
     oid = request.args.get("oid")
-
-    order = db.Orders.find_one({"_id": ObjectId(oid)})
-
-    db.Orders.update_one({"_id": ObjectId(oid)},
-                {"$set": {"confirmed": True}})
     
-    cart_ids = order.get("cart", [])
+    order = Orders.query.get(oid)
+    if not order:
+        flash("Order not found.")
+        return redirect(url_for("orders"))
+
+    # Mark order as confirmed
+    order.confirmed = True
+    db.session.commit()
+
+    # Fetch cart product IDs (assuming JSON-encoded list)
+    cart_ids = order.cart or []
     product_objects = []
     if cart_ids:
-        object_ids = [ObjectId(pid) for pid in cart_ids if is_valid_objectid(pid)]
-        product_cursor = db.Photos.find({"_id": {"$in": object_ids}})
-        product_objects = list(product_cursor)
+        product_objects = Photos.query.filter(Photos.id.in_(cart_ids)).all()
 
-    # ✅ Create ZIP file in memory
+    # Create ZIP of photos
+    # zip_buffer = BytesIO()
+    # with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+    #     for idx, product in enumerate(product_objects):
+    #         image_url = product.photo
+    #         if not image_url:
+    #             continue
+    #         try:
+    #             response = requests.get(image_url)
+    #             if response.status_code == 200:
+    #                 title = product.title or f'image_{idx+1}'
+    #                 zip_file.writestr(f"{title}.jpg", response.content)
+    #                 print(title)
+    #         except:
+    #             pass
+
+    # zip_buffer.seek(0)
+    # Create ZIP of photos
     zip_buffer = BytesIO()
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         for idx, product in enumerate(product_objects):
-            image_url = product.get("photo")
+            image_url = product.photo
             if not image_url:
                 continue
             try:
                 response = requests.get(image_url)
                 if response.status_code == 200:
-                    # Save with a readable name
-                    zip_file.writestr(f"{product.get('title', f'image_{idx+1}')}.jpg", response.content)
-            except:
-                pass
+                    # Ensure safe file name
+                    title = (product.photo_name or f"photo_{product.id}").replace("/", "_").replace("\\", "_")
+                    zip_file.writestr(f"{title}.jpg", response.content)
+                    print(f"✅ Added {title}.jpg to ZIP")
+                else:
+                    print(f"❌ Failed to fetch {image_url}: Status {response.status_code}")
+            except Exception as e:
+                print(f"⚠️ Error downloading {image_url}: {e}")
 
     zip_buffer.seek(0)
 
-    # ✅ Build Email Body
+    # Prepare email
     email_html = render_template_string("""
         <html>
         <body>
             <h2>Hello {{ name }},</h2>
-            <p>Your order <strong>#{{ oid }}</strong> has been confirmed! 🎉</p>
+            <p>Your order <strong>#{{ oid }}</strong> has been accepted!</p>
             <p>We have attached your purchased photos as a downloadable ZIP file.</p>
             <p>Thank you for shopping with Memory Box ❤️</p>
         </body>
         </html>
-    """, name=order.get("name", "Customer"), oid=oid)
+    """, name=order.name or "Customer", oid=oid)
 
-    # ✅ Send Email with ZIP attachment
-    customer_email = order.get("email")
-    if customer_email:
+    if order.email:
         msg = Message(
             subject="🎉 Your Memory Box Order Has Been Confirmed!",
             sender=app.config['MAIL_USERNAME'],
-            recipients=[customer_email]
+            recipients=[order.email]
         )
         msg.html = email_html
         msg.attach(f"MemoryBox_Order_{oid}.zip", "application/zip", zip_buffer.read())
         mail.send(msg)
-
 
     return redirect(url_for('orders'))
 
@@ -525,18 +597,38 @@ def confirmed():
 @login_required
 def summary():
     oid = request.args.get("oid")
-    order = db.Orders.find_one({"_id": ObjectId(oid)})
-    cart_ids = order.get("cart", [])
+
+    # Fetch order using SQLAlchemy
+    order = Orders.query.get(oid)
+    if not order:
+        flash("Order not found.")
+        return redirect(url_for("orders"))
+
+    # Decode cart (stored as JSON string in SQL DB)
+    try:
+        cart_ids = order.cart if order.cart else []
+    except json.JSONDecodeError:
+        cart_ids = []
+
     product_objects = []
     if cart_ids:
-        object_ids = [ObjectId(pid) for pid in cart_ids if is_valid_objectid(pid)]
-        product_cursor = db.Photos.find({"_id": {"$in": object_ids}})
-        product_objects = list(product_cursor)
+        product_objects = Photos.query.filter(Photos.id.in_(cart_ids)).all()
 
-    print(product_objects)
     return render_template("summary.html", order=order, products=product_objects)
+
+@app.route("/add_admin")
+def add_admin():
+    username = "aryanmanchanda@hotmail.com"
+    password = "123456"
+    hashed_password = bc.hashpw(password.encode(), bc.gensalt())
+    admin = Admin(email=username, password=hashed_password)
+    db.session.add(admin)
+    db.session.commit()
+
+    return redirect(url_for('home'))
 
 
 if __name__ == "__main__":
     with app.app_context():
-        app.run(port=5000, debug=True)
+        db.create_all()
+        app.run(debug=True)

@@ -72,13 +72,13 @@
                     {% for event in events %}
                     <tr class="border-t border-t-[#cedbe8]">
                       <td class="table-8b016e29-c480-4d52-97c2-f4273a816d13-column-120 h-[72px] px-4 py-2 w-[400px] text-[#0d141c] text-sm font-normal leading-normal">
-                        <a href="{{ url_for('photos', event=event['_id']) }}">{{ event["event_name"] }} {{ event["year"] }}</a>
+                        <a href="{{ url_for('photos', event=event['id']) }}">{{ event["event_name"] }} {{ event["year"] }}</a>
                       </td>
                       <td class="table-8b016e29-c480-4d52-97c2-f4273a816d13-column-240 h-[72px] px-4 py-2 w-[400px] text-[#49739c] text-sm font-normal leading-normal">
                         {{ event["month"] }} {{ event["day"] }}, {{ event["year"] }}
                       </td>
                       <td class="table-8b016e29-c480-4d52-97c2-f4273a816d13-column-360 h-[72px] px-4 py-2 w-60 text-[#49739c] text-sm font-bold leading-normal tracking-[0.015em]">
-                      <a href="{{ url_for('remove_event', event_id = event['_id']) }}">Remove</a>
+                      <a href="{{ url_for('remove_event', event_id = event['id']) }}">Remove</a>
                       </td>
                     </tr>
                     {% endfor %}

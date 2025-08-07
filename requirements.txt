@@ -11,6 +11,8 @@ Flask
 Flask-Bcrypt
 Flask-Login
 Flask-Mail==0.10.0
+Flask-SQLAlchemy==3.1.1
+greenlet
 idna
 itsdangerous
 Jinja2
@@ -20,5 +22,7 @@ pymongo
 python-dotenv
 requests==2.32.4
 six==1.17.0
+SQLAlchemy
+typing_extensions
 urllib3==2.5.0
 Werkzeug
